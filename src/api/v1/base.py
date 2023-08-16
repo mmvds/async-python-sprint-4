@@ -33,7 +33,7 @@ async def register(username: str, password: str, db: AsyncSession = Depends(get_
     user = User(username=username, password=password)
     db.add(user)
     await db.commit()
-    return {'message': 'User registered successfully'}
+    return {'detail': 'User registered successfully'}
 
 
 @api_router.post('/shorten', response_model=List[ShortURLItem], dependencies=[Depends(check_allowed_ip)])
@@ -121,7 +121,7 @@ async def get_original_url(short_id: str, credentials: HTTPBasicCredentials = De
     if db_item.visibility == 'private' and user.id != db_item.user_id:
         raise HTTPException(status_code=401, detail='Unauthorized')
 
-    return db_item['original_url']
+    raise HTTPException(status_code=307, detail='Redirected', headers={'location': db_item['original_url']})
 
 @api_router.delete('/{short_id}', dependencies=[Depends(check_allowed_ip)])
 async def delete_shortened_url(short_id: str, credentials: HTTPBasicCredentials = Depends(security),
@@ -140,6 +140,6 @@ async def delete_shortened_url(short_id: str, credentials: HTTPBasicCredentials 
     delete_query = URLItem.__table__.update().where(URLItem.short_id == short_id).values(is_deleted=True)
     await db.execute(delete_query)
     await db.commit()
-    return {'message': 'Short URL has been marked as deleted'}
+    return {'detail': 'Short URL has been marked as deleted'}
 
 

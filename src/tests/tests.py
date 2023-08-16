@@ -54,7 +54,7 @@ def test_ping_db(client):
 def test_register_user(client):
     response = client.post('/api/v1/register', params={'username': credentials[0], 'password': credentials[1]})
     assert response.status_code == 200
-    assert response.json() == {'message': 'User registered successfully'}
+    assert response.json() == {'detail': 'User registered successfully'}
 
 def test_shorten_urls(client):
     global public_id, private_id
@@ -73,12 +73,15 @@ def test_user_status(client):
 def test_get_original_url(client):
     short_id = public_id
     response = client.get(f'/api/v1/{short_id}', auth=credentials)
-    print(response.json())
-    assert response.status_code == 200
-    assert response.json() == urls[0]['original_url']
+    assert response.url == urls[0]['original_url']
 
 def test_delete_shortened_url(client):
     short_id = public_id
     response = client.delete(f'/api/v1/{short_id}', auth=credentials)
     assert response.status_code == 200
-    assert response.json() == {'message': 'Short URL has been marked as deleted'}
+    assert response.json() == {'detail': 'Short URL has been marked as deleted'}
+def test_get_deleted_url(client):
+    short_id = public_id
+    response = client.get(f'/api/v1/{short_id}', auth=credentials)
+    assert response.status_code == 410
+    assert response.json() == {'detail': 'Gone'}
