@@ -7,5 +7,5 @@ SQLAlchemy~=1.4
 SQLAlchemy-Utils~=0.38
 asyncpg~=0.26
 databases[postgresql]~=0.6
-alembic
-pytest
+alembic~=1.11
+pytest~=7.4
